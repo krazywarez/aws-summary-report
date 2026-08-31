@@ -1,0 +1,91 @@
+#+title: aws summary
+
+* what
+python tool. sends one plaintext email a day summarizing an aws
+account: billing, security hub findings, route 53 health checks,
+cloudwatch alarms, s3 audit, expiring acm certs, config compliance,
+cloudfront changes, waf blocks.
+
+built for solo or small-team accounts. add a section by dropping
+new_section.py in sections/ and listing it in config.toml.
+
+* configure
+edit config.toml:
+
+#+begin_src conf
+[aws]
+profile = "default"
+region = "us-east-1"
+#+end_src
+
+#+begin_src conf
+[email]
+from = "you@example.com"
+to = ["you@example.com"]
+subject = "Daily AWS Report"
+#+end_src
+
+#+begin_src conf
+[report]
+sections = ["acm"]
+#+end_src
+
+no aws profile yet:
+
+#+begin_src sh
+aws configure --profile default
+#+end_src
+
+* run
+#+begin_src sh
+python main.py
+#+end_src
+
+or with uv (installs deps, makes a venv):
+
+#+begin_src sh
+uv run main.py
+#+end_src
+
+emails are plaintext with ascii tables via tabulate.
+
+* install
+python 3.11+.
+
+#+begin_src sh
+pip install -r requirements.txt
+# or: uv sync
+#+end_src
+
+needs boto3 and tabulate. the iam user or role needs read access to
+cost explorer, security hub, s3, cloudfront, cloudwatch, route 53,
+acm, config, waf, and ses if sending from aws.
+
+* structure
+#+begin_example
+config.toml          aws profile, region, email, report options
+main.py              entry point; builds and sends the report
+email_formatter.py   formats the email body
+utils.py             shared helpers
+pyproject.toml       metadata and dependencies
+sections/            one generator per section
+  acm.py             expiring certs
+  cloudfront.py      distribution changes
+  cloudwatch.py      alarms
+  config.py          config compliance
+  costexplorer.py    billing
+  route53.py         health checks
+  s3.py              bucket audit
+  securityhub.py     findings
+#+end_example
+
+each section implements get_section(config) -> str. add, remove, or
+order sections in config.toml.
+
+* todo
+- csv or html export
+- slack or teams notifications
+- lambda deployment
+
+* license
+0bsd. see LICENSE.
