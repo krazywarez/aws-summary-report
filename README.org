@@ -1,5 +1,7 @@
 #+title: aws summary
 
+support this project through [[https://github.com/sponsors/ccleberg][github sponsors]].
+
 * what
 python tool. sends one plaintext email a day summarizing an aws
 account: billing, security hub findings, route 53 health checks,
